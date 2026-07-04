@@ -5,7 +5,7 @@ Aplicacao simples para cadastro de pessoas, registro de receitas e despesas e co
 ## Tecnologias
 
 - Backend em C# com ASP.NET Core
-- Frontend em HTML, CSS e JavaScript
+- Frontend em React com TypeScript
 - Persistencia local em arquivo JSON
 
 ## Funcionalidades previstas
@@ -19,8 +19,18 @@ Aplicacao simples para cadastro de pessoas, registro de receitas e despesas e co
 ## Como executar
 
 ```bash
+cd frontend
+npm install
+npm run build
+cd ..
 dotnet run --project src/ControleFinanceiro.csproj
 ```
 
 Depois, acesse o endereco exibido pelo terminal.
 
+Durante o desenvolvimento do front-end, tambem e possivel usar:
+
+```bash
+cd frontend
+npm run dev
+```

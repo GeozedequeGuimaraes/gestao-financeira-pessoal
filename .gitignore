@@ -5,4 +5,7 @@ obj/
 appsettings.Development.json
 data/*.json
 !data/.gitkeep
-
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+src/wwwroot/assets/
