@@ -2,6 +2,8 @@
 
 Aplicação para cadastro de pessoas, registro de receitas e despesas e consulta de totais por pessoa.
 
+![Interface da aplicação](docs/interface.png)
+
 ## Tecnologias
 
 - Backend em C# com ASP.NET Core
