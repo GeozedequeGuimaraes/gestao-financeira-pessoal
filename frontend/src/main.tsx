@@ -1,5 +1,6 @@
 import React, { FormEvent, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
+import imagemTopo from "./assets/controle-financeiro.jpg";
 import "./styles.css";
 
 type Pessoa = {
@@ -139,23 +140,30 @@ function App() {
       <header className="topo">
         <div>
           <span className="rotulo">Controle residencial</span>
-          <h1>Gestao financeira pessoal</h1>
+          <h1>Gestão financeira pessoal</h1>
+          <p className="subtitulo">
+            Cadastre pessoas, registre movimentações e acompanhe o saldo de cada uma.
+          </p>
         </div>
-        <section className="resumo-geral" aria-label="Resumo geral">
-          <div>
-            <span>Receitas</span>
-            <strong>{moeda.format(totais?.totalGeralReceitas ?? 0)}</strong>
-          </div>
-          <div>
-            <span>Despesas</span>
-            <strong>{moeda.format(totais?.totalGeralDespesas ?? 0)}</strong>
-          </div>
-          <div>
-            <span>Saldo</span>
-            <strong>{moeda.format(totais?.saldoGeral ?? 0)}</strong>
-          </div>
-        </section>
+        <figure className="foto-topo">
+          <img src={imagemTopo} alt="Mesa com calculadora, relatórios e uma xícara de café" />
+        </figure>
       </header>
+
+      <section className="resumo-geral" aria-label="Resumo geral">
+        <div>
+          <span>Receitas</span>
+          <strong>{moeda.format(totais?.totalGeralReceitas ?? 0)}</strong>
+        </div>
+        <div>
+          <span>Despesas</span>
+          <strong>{moeda.format(totais?.totalGeralDespesas ?? 0)}</strong>
+        </div>
+        <div>
+          <span>Saldo</span>
+          <strong>{moeda.format(totais?.saldoGeral ?? 0)}</strong>
+        </div>
+      </section>
 
       {mensagem && <p className="aviso">{mensagem}</p>}
 
@@ -187,7 +195,7 @@ function App() {
         </form>
 
         <form className="painel" onSubmit={cadastrarTransacao}>
-          <h2>Nova transacao</h2>
+          <h2>Nova transação</h2>
           <label>
             Pessoa
             <select value={pessoaId} onChange={(evento) => setPessoaId(evento.target.value)} required>
@@ -200,7 +208,7 @@ function App() {
             </select>
           </label>
           <label>
-            Descricao
+            Descrição
             <input value={descricao} onChange={(evento) => setDescricao(evento.target.value)} required />
           </label>
           <div className="linha">
@@ -251,7 +259,7 @@ function App() {
         </div>
 
         <div className="painel">
-          <h2>Transacoes</h2>
+          <h2>Transações</h2>
           <div className="lista">
             {transacoes.map((transacao) => (
               <article key={transacao.id} className="item">
@@ -294,4 +302,3 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </React.StrictMode>
 );
-

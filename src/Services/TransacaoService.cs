@@ -38,7 +38,7 @@ public class TransacaoService
 
         if (pessoa is null)
         {
-            return ResultadoTransacao.Erro("Pessoa nao encontrada.");
+            return ResultadoTransacao.Erro("Pessoa não encontrada.");
         }
 
         var tipo = entrada.Tipo.Trim().ToLowerInvariant();
@@ -116,4 +116,3 @@ public class TransacaoService
         await JsonSerializer.SerializeAsync(stream, transacoes, _jsonOptions);
     }
 }
-
