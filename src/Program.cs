@@ -112,4 +112,47 @@ app.MapDelete("/api/transacoes/{id:int}", async (int id, TransacaoService servic
     return apagou ? Results.NoContent() : Results.NotFound();
 });
 
+app.MapGet("/api/totais", async (PessoaService pessoaService, TransacaoService transacaoService) =>
+{
+    var pessoas = await pessoaService.ListarAsync();
+    var transacoes = await transacaoService.ListarAsync();
+
+    var pessoasComTotais = pessoas
+        .Select(pessoa =>
+        {
+            var transacoesDaPessoa = transacoes
+                .Where(transacao => transacao.PessoaId == pessoa.Id)
+                .ToList();
+
+            var totalReceitas = transacoesDaPessoa
+                .Where(transacao => transacao.Tipo == "receita")
+                .Sum(transacao => transacao.Valor);
+
+            var totalDespesas = transacoesDaPessoa
+                .Where(transacao => transacao.Tipo == "despesa")
+                .Sum(transacao => transacao.Valor);
+
+            return new TotalPessoa
+            {
+                PessoaId = pessoa.Id,
+                Nome = pessoa.Nome,
+                TotalReceitas = totalReceitas,
+                TotalDespesas = totalDespesas,
+                Saldo = totalReceitas - totalDespesas
+            };
+        })
+        .ToList();
+
+    var totalGeralReceitas = pessoasComTotais.Sum(item => item.TotalReceitas);
+    var totalGeralDespesas = pessoasComTotais.Sum(item => item.TotalDespesas);
+
+    return Results.Ok(new ConsultaTotais
+    {
+        Pessoas = pessoasComTotais,
+        TotalGeralReceitas = totalGeralReceitas,
+        TotalGeralDespesas = totalGeralDespesas,
+        SaldoGeral = totalGeralReceitas - totalGeralDespesas
+    });
+});
+
 app.Run();
