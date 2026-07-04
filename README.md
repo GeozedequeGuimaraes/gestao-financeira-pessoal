@@ -57,6 +57,8 @@ cd frontend
 npm run dev
 ```
 
+Nesse modo de desenvolvimento, o front-end depende da API do ASP.NET Core em execução para carregar cadastros, transações e totais.
+
 ## Observações
 
 Os dados são armazenados em arquivos JSON na pasta `data`, o que permite manter as informações cadastradas mesmo após fechar a aplicação.

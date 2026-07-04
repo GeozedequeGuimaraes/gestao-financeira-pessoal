@@ -60,6 +60,7 @@ function App() {
   const [totais, setTotais] = useState<ConsultaTotais | null>(null);
   const [pessoaEditando, setPessoaEditando] = useState<Pessoa | null>(null);
   const [mensagem, setMensagem] = useState("");
+  const [apiDisponivel, setApiDisponivel] = useState(true);
 
   const [nome, setNome] = useState("");
   const [idade, setIdade] = useState("");
@@ -70,8 +71,8 @@ function App() {
 
   async function carregarDados() {
     try {
-      const [pessoasDados, transacoesDados, totaisDados] = await Promise.all([
-        buscarJson<Pessoa[]>("/api/pessoas", []),
+      const pessoasDados = await buscarJson<Pessoa[]>("/api/pessoas", []);
+      const [transacoesDados, totaisDados] = await Promise.all([
         buscarJson<Transacao[]>("/api/transacoes", []),
         buscarJson<ConsultaTotais>("/api/totais", totaisVazios)
       ]);
@@ -79,10 +80,12 @@ function App() {
       setPessoas(pessoasDados);
       setTransacoes(transacoesDados);
       setTotais(totaisDados);
+      setApiDisponivel(true);
     } catch {
       setPessoas([]);
       setTransacoes([]);
       setTotais(totaisVazios);
+      setApiDisponivel(false);
     }
   }
 
@@ -103,26 +106,43 @@ function App() {
       idade: Number(idade)
     };
 
-    const resposta = await fetch(pessoaEditando ? `/api/pessoas/${pessoaEditando.id}` : "/api/pessoas", {
-      method: pessoaEditando ? "PUT" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(corpo)
-    });
+    try {
+      const resposta = await fetch(pessoaEditando ? `/api/pessoas/${pessoaEditando.id}` : "/api/pessoas", {
+        method: pessoaEditando ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(corpo)
+      });
 
-    if (!resposta.ok) {
-      setMensagem(await resposta.text());
-      return;
+      if (!resposta.ok) {
+        setMensagem(await resposta.text());
+        return;
+      }
+
+      setNome("");
+      setIdade("");
+      setPessoaEditando(null);
+      await carregarDados();
+    } catch {
+      setMensagem("Não foi possível conectar ao back-end. Verifique se a API está em execução.");
     }
-
-    setNome("");
-    setIdade("");
-    setPessoaEditando(null);
-    await carregarDados();
   }
 
   async function removerPessoa(id: number) {
-    await fetch(`/api/pessoas/${id}`, { method: "DELETE" });
-    await carregarDados();
+    const pessoa = pessoas.find((item) => item.id === id);
+    const confirmou = window.confirm(
+      `Excluir ${pessoa?.nome ?? "esta pessoa"}? As transações vinculadas também serão removidas.`
+    );
+
+    if (!confirmou) {
+      return;
+    }
+
+    try {
+      await fetch(`/api/pessoas/${id}`, { method: "DELETE" });
+      await carregarDados();
+    } catch {
+      setMensagem("Não foi possível conectar ao back-end. Verifique se a API está em execução.");
+    }
   }
 
   function editarPessoa(pessoa: Pessoa) {
@@ -135,27 +155,31 @@ function App() {
     evento.preventDefault();
     setMensagem("");
 
-    const resposta = await fetch("/api/transacoes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        descricao,
-        valor: Number(valor),
-        tipo,
-        pessoaId: Number(pessoaId)
-      })
-    });
+    try {
+      const resposta = await fetch("/api/transacoes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          descricao,
+          valor: Number(valor),
+          tipo,
+          pessoaId: Number(pessoaId)
+        })
+      });
 
-    if (!resposta.ok) {
-      setMensagem(await resposta.text());
-      return;
+      if (!resposta.ok) {
+        setMensagem(await resposta.text());
+        return;
+      }
+
+      setDescricao("");
+      setValor("");
+      setTipo("despesa");
+      setPessoaId("");
+      await carregarDados();
+    } catch {
+      setMensagem("Não foi possível conectar ao back-end. Verifique se a API está em execução.");
     }
-
-    setDescricao("");
-    setValor("");
-    setTipo("despesa");
-    setPessoaId("");
-    await carregarDados();
   }
 
   return (
@@ -183,16 +207,25 @@ function App() {
         <div className="receitas-card">
           <span>Receitas</span>
           <strong>{moeda.format(totais?.totalGeralReceitas ?? 0)}</strong>
+          <i aria-hidden="true">+</i>
         </div>
         <div className="despesas-card">
           <span>Despesas</span>
           <strong>{moeda.format(totais?.totalGeralDespesas ?? 0)}</strong>
+          <i aria-hidden="true">-</i>
         </div>
         <div className="saldo-card">
           <span>Saldo</span>
           <strong>{moeda.format(totais?.saldoGeral ?? 0)}</strong>
+          <i aria-hidden="true">=</i>
         </div>
       </section>
+
+      {!apiDisponivel && (
+        <p className="aviso">
+          O back-end não está respondendo. Inicie a API para cadastrar pessoas, transações e atualizar os totais.
+        </p>
+      )}
 
       {mensagem && <p className="aviso">{mensagem}</p>}
 
@@ -277,6 +310,8 @@ function App() {
             <h2>Pessoas</h2>
           </div>
           <div className="lista">
+            {pessoas.length === 0 && <p className="vazio">Nenhuma pessoa cadastrada.</p>}
+
             {pessoas.map((pessoa) => (
               <article key={pessoa.id} className="item">
                 <div>
@@ -302,6 +337,8 @@ function App() {
             <h2>Transações</h2>
           </div>
           <div className="lista">
+            {transacoes.length === 0 && <p className="vazio">Nenhuma transação registrada.</p>}
+
             {transacoes.map((transacao) => (
               <article key={transacao.id} className="item">
                 <div>
@@ -335,6 +372,7 @@ function App() {
               <strong>{moeda.format(pessoa.saldo)}</strong>
             </div>
           ))}
+          {totais?.pessoas.length === 0 && <p className="vazio">Nenhum total disponível.</p>}
         </div>
       </section>
     </main>

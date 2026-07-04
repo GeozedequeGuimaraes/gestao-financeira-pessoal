@@ -163,27 +163,28 @@ h2 {
   overflow: hidden;
 }
 
-.resumo-geral div::after {
-  content: "";
+.resumo-geral i {
   position: absolute;
   right: 18px;
   top: 18px;
   width: 42px;
   height: 42px;
+  display: grid;
+  place-items: center;
   border-radius: 14px;
   background: #d9ff63;
+  color: #0c2721;
+  font-size: 1.35rem;
+  font-style: normal;
+  font-weight: 900;
 }
 
-.receitas-card::after {
+.receitas-card i {
   background: #bff5cf;
 }
 
-.despesas-card::after {
+.despesas-card i {
   background: #f3b7a9;
-}
-
-.saldo-card::after {
-  background: #d9ff63;
 }
 
 .resumo-geral span,
@@ -312,6 +313,16 @@ button:hover {
   padding: 12px 14px;
   background: #fff0d8;
   color: #5c3516;
+  font-weight: 700;
+}
+
+.vazio {
+  margin: 0;
+  border: 1px dashed #cdd9c8;
+  border-radius: 14px;
+  padding: 16px;
+  background: #f8fbf5;
+  color: #607269;
   font-weight: 700;
 }
 
