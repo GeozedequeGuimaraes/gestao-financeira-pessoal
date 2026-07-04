@@ -7,5 +7,6 @@ data/*.json
 !data/.gitkeep
 frontend/node_modules/
 frontend/dist/
+frontend/.vite/
 frontend/*.tsbuildinfo
 src/wwwroot/assets/
