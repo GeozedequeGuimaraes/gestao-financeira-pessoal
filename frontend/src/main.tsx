@@ -37,6 +37,23 @@ const moeda = new Intl.NumberFormat("pt-BR", {
   currency: "BRL"
 });
 
+const totaisVazios: ConsultaTotais = {
+  pessoas: [],
+  totalGeralReceitas: 0,
+  totalGeralDespesas: 0,
+  saldoGeral: 0
+};
+
+async function buscarJson<T>(url: string, valorPadrao: T) {
+  const resposta = await fetch(url);
+
+  if (!resposta.ok) {
+    return valorPadrao;
+  }
+
+  return (await resposta.json()) as T;
+}
+
 function App() {
   const [pessoas, setPessoas] = useState<Pessoa[]>([]);
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
@@ -52,15 +69,21 @@ function App() {
   const [pessoaId, setPessoaId] = useState("");
 
   async function carregarDados() {
-    const [pessoasResposta, transacoesResposta, totaisResposta] = await Promise.all([
-      fetch("/api/pessoas"),
-      fetch("/api/transacoes"),
-      fetch("/api/totais")
-    ]);
+    try {
+      const [pessoasDados, transacoesDados, totaisDados] = await Promise.all([
+        buscarJson<Pessoa[]>("/api/pessoas", []),
+        buscarJson<Transacao[]>("/api/transacoes", []),
+        buscarJson<ConsultaTotais>("/api/totais", totaisVazios)
+      ]);
 
-    setPessoas(await pessoasResposta.json());
-    setTransacoes(await transacoesResposta.json());
-    setTotais(await totaisResposta.json());
+      setPessoas(pessoasDados);
+      setTransacoes(transacoesDados);
+      setTotais(totaisDados);
+    } catch {
+      setPessoas([]);
+      setTransacoes([]);
+      setTotais(totaisVazios);
+    }
   }
 
   useEffect(() => {
@@ -138,28 +161,34 @@ function App() {
   return (
     <main className="pagina">
       <header className="topo">
-        <div>
+        <div className="texto-topo">
           <span className="rotulo">Controle residencial</span>
-          <h1>Gestão financeira pessoal</h1>
+          <h1>Organize gastos, receitas e saldos da casa.</h1>
           <p className="subtitulo">
-            Cadastre pessoas, registre movimentações e acompanhe o saldo de cada uma.
+            Cadastre pessoas, registre movimentações e acompanhe o resultado financeiro de cada uma.
           </p>
         </div>
-        <figure className="foto-topo">
-          <img src={imagemTopo} alt="Mesa com calculadora, relatórios e uma xícara de café" />
-        </figure>
+        <div className="visual-topo">
+          <figure className="foto-topo">
+            <img src={imagemTopo} alt="Mesa com calculadora, relatórios e uma xícara de café" />
+          </figure>
+          <div className="cartao-destaque">
+            <span>Saldo geral</span>
+            <strong>{moeda.format(totais?.saldoGeral ?? 0)}</strong>
+          </div>
+        </div>
       </header>
 
       <section className="resumo-geral" aria-label="Resumo geral">
-        <div>
+        <div className="receitas-card">
           <span>Receitas</span>
           <strong>{moeda.format(totais?.totalGeralReceitas ?? 0)}</strong>
         </div>
-        <div>
+        <div className="despesas-card">
           <span>Despesas</span>
           <strong>{moeda.format(totais?.totalGeralDespesas ?? 0)}</strong>
         </div>
-        <div>
+        <div className="saldo-card">
           <span>Saldo</span>
           <strong>{moeda.format(totais?.saldoGeral ?? 0)}</strong>
         </div>
@@ -168,8 +197,11 @@ function App() {
       {mensagem && <p className="aviso">{mensagem}</p>}
 
       <section className="grade">
-        <form className="painel" onSubmit={salvarPessoa}>
-          <h2>{pessoaEditando ? "Editar pessoa" : "Nova pessoa"}</h2>
+        <form className="painel formulario-pessoa" onSubmit={salvarPessoa}>
+          <div className="cabecalho-painel">
+            <span>Cadastro</span>
+            <h2>{pessoaEditando ? "Editar pessoa" : "Nova pessoa"}</h2>
+          </div>
           <label>
             Nome
             <input value={nome} onChange={(evento) => setNome(evento.target.value)} required />
@@ -194,8 +226,11 @@ function App() {
           </div>
         </form>
 
-        <form className="painel" onSubmit={cadastrarTransacao}>
-          <h2>Nova transação</h2>
+        <form className="painel formulario-transacao" onSubmit={cadastrarTransacao}>
+          <div className="cabecalho-painel">
+            <span>Movimentação</span>
+            <h2>Nova transação</h2>
+          </div>
           <label>
             Pessoa
             <select value={pessoaId} onChange={(evento) => setPessoaId(evento.target.value)} required>
@@ -237,7 +272,10 @@ function App() {
 
       <section className="conteudo">
         <div className="painel">
-          <h2>Pessoas</h2>
+          <div className="cabecalho-painel">
+            <span>Moradores</span>
+            <h2>Pessoas</h2>
+          </div>
           <div className="lista">
             {pessoas.map((pessoa) => (
               <article key={pessoa.id} className="item">
@@ -259,7 +297,10 @@ function App() {
         </div>
 
         <div className="painel">
-          <h2>Transações</h2>
+          <div className="cabecalho-painel">
+            <span>Lançamentos</span>
+            <h2>Transações</h2>
+          </div>
           <div className="lista">
             {transacoes.map((transacao) => (
               <article key={transacao.id} className="item">
@@ -275,7 +316,10 @@ function App() {
       </section>
 
       <section className="painel totais">
-        <h2>Totais por pessoa</h2>
+        <div className="cabecalho-painel">
+          <span>Consolidado</span>
+          <h2>Totais por pessoa</h2>
+        </div>
         <div className="tabela">
           <div className="cabecalho">
             <span>Pessoa</span>
