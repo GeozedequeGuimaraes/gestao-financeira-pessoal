@@ -35,11 +35,18 @@ Aplicação para cadastro de pessoas, registro de receitas e despesas e consulta
 
 ## Como executar
 
-Primeiro, gere os arquivos do front-end:
+Instale as dependências do front-end:
 
 ```bash
 cd frontend
 npm install
+```
+
+### Rodando a aplicação completa
+
+Primeiro, gere os arquivos do front-end que serão servidos pelo ASP.NET Core:
+
+```bash
 npm run build
 cd ..
 ```
@@ -52,14 +59,24 @@ dotnet run --project src/ControleFinanceiro.csproj
 
 Acesse o endereço exibido pelo terminal.
 
-Durante o desenvolvimento do front-end, também é possível usar:
+### Rodando em modo desenvolvimento
+
+Para desenvolver com atualização automática do React, mantenha dois terminais abertos.
+
+No primeiro terminal, execute a API:
+
+```bash
+dotnet run --project src/ControleFinanceiro.csproj
+```
+
+No segundo terminal, execute o front-end:
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-Nesse modo de desenvolvimento, o front-end depende da API do ASP.NET Core em execução para carregar cadastros, transações e totais.
+Nesse modo, acesse o endereço exibido pelo Vite, normalmente `http://127.0.0.1:5173`. O front-end depende da API do ASP.NET Core em execução para carregar cadastros, transações e totais.
 
 ## Observações
 
