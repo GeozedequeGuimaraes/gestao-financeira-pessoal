@@ -37,7 +37,7 @@ app.MapPost("/api/pessoas", async (PessoaEntrada entrada, PessoaService service)
 
     if (entrada.Idade < 0)
     {
-        return Results.BadRequest("Informe uma idade valida.");
+        return Results.BadRequest("Informe uma idade válida.");
     }
 
     var pessoa = await service.CriarAsync(entrada);
@@ -53,7 +53,7 @@ app.MapPut("/api/pessoas/{id:int}", async (int id, PessoaEntrada entrada, Pessoa
 
     if (entrada.Idade < 0)
     {
-        return Results.BadRequest("Informe uma idade valida.");
+        return Results.BadRequest("Informe uma idade válida.");
     }
 
     var pessoa = await service.AtualizarAsync(id, entrada);
@@ -88,7 +88,7 @@ app.MapPost("/api/transacoes", async (TransacaoEntrada entrada, TransacaoService
 {
     if (string.IsNullOrWhiteSpace(entrada.Descricao))
     {
-        return Results.BadRequest("Informe a descricao da transacao.");
+        return Results.BadRequest("Informe a descrição da transação.");
     }
 
     if (entrada.Valor <= 0)
