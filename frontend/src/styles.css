@@ -302,6 +302,10 @@ button:hover {
   align-items: center;
 }
 
+.linha {
+  align-items: stretch;
+}
+
 .linha > * {
   flex: 1;
 }
