@@ -54,6 +54,22 @@ async function buscarJson<T>(url: string, valorPadrao: T) {
   return (await resposta.json()) as T;
 }
 
+async function lerMensagemErro(resposta: Response) {
+  const texto = await resposta.text();
+
+  try {
+    const conteudo = JSON.parse(texto);
+
+    if (typeof conteudo === "string") {
+      return conteudo;
+    }
+  } catch {
+    return texto;
+  }
+
+  return texto;
+}
+
 function App() {
   const [pessoas, setPessoas] = useState<Pessoa[]>([]);
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
@@ -97,6 +113,12 @@ function App() {
     return new Map(pessoas.map((pessoa) => [pessoa.id, pessoa]));
   }, [pessoas]);
 
+  function limparFormularioPessoa() {
+    setNome("");
+    setIdade("");
+    setPessoaEditando(null);
+  }
+
   async function salvarPessoa(evento: FormEvent) {
     evento.preventDefault();
     setMensagem("");
@@ -114,13 +136,11 @@ function App() {
       });
 
       if (!resposta.ok) {
-        setMensagem(await resposta.text());
+        setMensagem(await lerMensagemErro(resposta));
         return;
       }
 
-      setNome("");
-      setIdade("");
-      setPessoaEditando(null);
+      limparFormularioPessoa();
       await carregarDados();
     } catch {
       setMensagem("Não foi possível conectar ao back-end. Verifique se a API está em execução.");
@@ -168,7 +188,7 @@ function App() {
       });
 
       if (!resposta.ok) {
-        setMensagem(await resposta.text());
+        setMensagem(await lerMensagemErro(resposta));
         return;
       }
 
@@ -252,7 +272,7 @@ function App() {
           <div className="acoes">
             <button type="submit">{pessoaEditando ? "Salvar" : "Cadastrar"}</button>
             {pessoaEditando && (
-              <button type="button" className="secundario" onClick={() => setPessoaEditando(null)}>
+              <button type="button" className="secundario" onClick={limparFormularioPessoa}>
                 Cancelar
               </button>
             )}
@@ -318,7 +338,7 @@ function App() {
                   <strong>{pessoa.nome}</strong>
                   <span>{pessoa.idade} anos</span>
                 </div>
-                <div className="acoes">
+                <div className="acoes acoes-lista">
                   <button type="button" className="secundario" onClick={() => editarPessoa(pessoa)}>
                     Editar
                   </button>
