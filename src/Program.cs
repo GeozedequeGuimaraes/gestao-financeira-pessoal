@@ -2,6 +2,8 @@ using ControleFinanceiro.Models;
 using ControleFinanceiro.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Singleton porque cada serviço mantém estado em arquivo e não pode ser recriado por requisição
 builder.Services.AddSingleton<PessoaService>();
 builder.Services.AddSingleton<TransacaoService>();
 
@@ -64,6 +66,7 @@ app.MapDelete("/api/pessoas/{id:int}", async (int id, PessoaService pessoaServic
 {
     var apagou = await pessoaService.RemoverAsync(id);
 
+    // Remove as transações vinculadas só se a pessoa de fato existia
     if (apagou)
     {
         await transacaoService.RemoverPorPessoaAsync(id);
@@ -96,6 +99,7 @@ app.MapPost("/api/transacoes", async (TransacaoEntrada entrada, TransacaoService
         return Results.BadRequest("Informe um valor maior que zero.");
     }
 
+    // A validação de regras de negócio (pessoa existente, restrição de idade) fica no serviço
     var resultado = await service.CriarAsync(entrada);
 
     if (!resultado.Sucesso)
@@ -117,6 +121,7 @@ app.MapGet("/api/totais", async (PessoaService pessoaService, TransacaoService t
     var pessoas = await pessoaService.ListarAsync();
     var transacoes = await transacaoService.ListarAsync();
 
+    // Agrupa as transações por pessoa e calcula receitas, despesas e saldo individual
     var pessoasComTotais = pessoas
         .Select(pessoa =>
         {
@@ -143,6 +148,7 @@ app.MapGet("/api/totais", async (PessoaService pessoaService, TransacaoService t
         })
         .ToList();
 
+    // Consolida o total geral somando os valores já calculados por pessoa
     var totalGeralReceitas = pessoasComTotais.Sum(item => item.TotalReceitas);
     var totalGeralDespesas = pessoasComTotais.Sum(item => item.TotalDespesas);
 

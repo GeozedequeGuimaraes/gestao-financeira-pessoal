@@ -6,6 +6,8 @@ namespace ControleFinanceiro.Services;
 public class PessoaService
 {
     private readonly string _arquivo;
+
+    // WriteIndented para o JSON ficar legível caso alguém precise abrir o arquivo manualmente
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         WriteIndented = true
@@ -13,6 +15,7 @@ public class PessoaService
 
     public PessoaService(IWebHostEnvironment ambiente)
     {
+        // Pasta "data" fica fora do src para não ser publicada junto com o código
         var pastaDados = Path.Combine(ambiente.ContentRootPath, "..", "data");
         Directory.CreateDirectory(pastaDados);
         _arquivo = Path.Combine(pastaDados, "pessoas.json");
@@ -32,6 +35,8 @@ public class PessoaService
     public async Task<Pessoa> CriarAsync(PessoaEntrada entrada)
     {
         var pessoas = await LerArquivoAsync();
+
+        // Max + 1 em vez de Count + 1 para não reutilizar IDs de registros já excluídos
         var proximoId = pessoas.Count == 0 ? 1 : pessoas.Max(pessoa => pessoa.Id) + 1;
 
         var pessoa = new Pessoa

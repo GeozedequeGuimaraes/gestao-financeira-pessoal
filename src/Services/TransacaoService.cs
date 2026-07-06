@@ -41,6 +41,7 @@ public class TransacaoService
             return ResultadoTransacao.Erro("Pessoa não encontrada.");
         }
 
+        // Normaliza para minúsculas antes de validar, evitando rejeitar "Receita" ou "DESPESA"
         var tipo = entrada.Tipo.Trim().ToLowerInvariant();
 
         if (tipo != "receita" && tipo != "despesa")
@@ -48,6 +49,7 @@ public class TransacaoService
             return ResultadoTransacao.Erro("O tipo deve ser receita ou despesa.");
         }
 
+        // Regra de negócio: menores de 18 anos só podem ter despesas registradas
         if (pessoa.Idade < 18 && tipo == "receita")
         {
             return ResultadoTransacao.Erro("Menores de idade podem ter apenas despesas cadastradas.");
@@ -87,6 +89,7 @@ public class TransacaoService
         return true;
     }
 
+    // Chamado quando uma pessoa é excluída, para manter a integridade dos dados
     public async Task RemoverPorPessoaAsync(int pessoaId)
     {
         var transacoes = await LerArquivoAsync();

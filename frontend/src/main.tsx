@@ -54,6 +54,7 @@ async function buscarJson<T>(url: string, valorPadrao: T) {
   return (await resposta.json()) as T;
 }
 
+// A API pode retornar o erro como string pura ou como JSON — tenta os dois casos
 async function lerMensagemErro(resposta: Response) {
   const texto = await resposta.text();
 
@@ -109,6 +110,7 @@ function App() {
     carregarDados();
   }, []);
 
+  // Mapa indexado por ID para buscar o nome da pessoa ao renderizar a lista de transações sem percorrer o array inteiro
   const pessoasPorId = useMemo(() => {
     return new Map(pessoas.map((pessoa) => [pessoa.id, pessoa]));
   }, [pessoas]);
@@ -149,6 +151,8 @@ function App() {
 
   async function removerPessoa(id: number) {
     const pessoa = pessoas.find((item) => item.id === id);
+
+    // Avisa o usuário que as transações vinculadas serão perdidas junto com a pessoa
     const confirmou = window.confirm(
       `Excluir ${pessoa?.nome ?? "esta pessoa"}? As transações vinculadas também serão removidas.`
     );
